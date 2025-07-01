@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use serde::{Deserialize, Serialize};
-use std::fs::{self, File};
-use std::io::{self, Write};
+use std::fs;
+use std::io;
 use std::path::Path;
 
 #[derive(Parser, Debug)]
@@ -58,21 +58,30 @@ impl TodoList {
         self.next_id += 1;
     }
 
-    fn complete_task(&mut self, id: usize) -> Result<(), String> {
-        if let Some(task) = self.tasks.iter_mut().find(|task| task.id == id) {
-            task.completed = true;
-            Ok(())
+    fn list_tasks(&self) {
+        if self.tasks.is_empty() {
+            println!("No tasks found");
         } else {
-            Err(format!("Task with ID {} not found", id))
+            for task in &self.tasks {
+                println!(
+                    "{}: [{}] {}",
+                    task.id,
+                    if task.completed { "X" } else { " " },
+                    task.title
+                );
+            }
         }
     }
 
-    fn remove_task(&mut self, id: usize) -> Result<(), String> {
+    fn complete_task(&mut self, id: usize) {
+        if let Some(task) = self.tasks.iter_mut().find(|task| task.id == id) {
+            task.completed = true;
+        }
+    }
+
+    fn remove_task(&mut self, id: usize) {
         if let Some(index) = self.tasks.iter().position(|task| task.id == id) {
             self.tasks.remove(index);
-            Ok(())
-        } else {
-            Err(format!("Task with ID {} not found", id))
         }
     }
 
@@ -93,7 +102,28 @@ impl TodoList {
     }
 }
 
-fn main() {
+fn main() -> io::Result<()> {
     let cli = Cli::parse();
-    println!("{:?}", cli);
+    let filename = "todo.json";
+    let mut todo_list = TodoList::load_from_file(filename)?;
+
+    match cli.command {
+        Commands::Add { title } => {
+            todo_list.add_task(title);
+            todo_list.save_to_file(filename)?;
+        }
+        Commands::List => {
+            todo_list.list_tasks();
+        }
+        Commands::Complete { id } => {
+            todo_list.complete_task(id);
+            todo_list.save_to_file(filename)?;
+        }
+        Commands::Remove { id } => {
+            todo_list.remove_task(id);
+            todo_list.save_to_file(filename)?;
+        }
+    }
+
+    Ok(())
 }
