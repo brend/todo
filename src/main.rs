@@ -1,8 +1,10 @@
 use clap::{Parser, Subcommand};
+use dirs;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::io;
 use std::path::Path;
+use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
 #[command(name = "todo", about = "A simple todo list manager")]
@@ -85,15 +87,18 @@ impl TodoList {
         }
     }
 
-    fn save_to_file(&self, filename: &str) -> io::Result<()> {
+    fn save_to_file(&self, path: &Path) -> io::Result<()> {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
         let json = serde_json::to_string_pretty(self)?;
-        fs::write(filename, json)?;
+        fs::write(path, json)?;
         Ok(())
     }
 
-    fn load_from_file(filename: &str) -> io::Result<Self> {
-        if Path::new(filename).exists() {
-            let json = fs::read_to_string(filename)?;
+    fn load_from_file(path: &Path) -> io::Result<Self> {
+        if path.exists() {
+            let json = fs::read_to_string(path)?;
             let todo_list = serde_json::from_str(&json)?;
             Ok(todo_list)
         } else {
@@ -102,26 +107,35 @@ impl TodoList {
     }
 }
 
+fn get_todo_file_path() -> io::Result<PathBuf> {
+    let config_dir = dirs::config_dir().ok_or_else(|| {
+        io::Error::new(io::ErrorKind::NotFound, "Could not find config directory")
+    })?;
+    let todo_dir = config_dir.join("todo");
+    Ok(todo_dir.join("todo.json"))
+}
+
 fn main() -> io::Result<()> {
     let cli = Cli::parse();
-    let filename = "todo.json";
-    let mut todo_list = TodoList::load_from_file(filename)?;
+    let todo_file_path = get_todo_file_path()?;
+    println!("todo file path: {:?}", todo_file_path);
+    let mut todo_list = TodoList::load_from_file(&todo_file_path)?;
 
     match cli.command {
         Commands::Add { title } => {
             todo_list.add_task(title);
-            todo_list.save_to_file(filename)?;
+            todo_list.save_to_file(&todo_file_path)?;
         }
         Commands::List => {
             todo_list.list_tasks();
         }
         Commands::Complete { id } => {
             todo_list.complete_task(id);
-            todo_list.save_to_file(filename)?;
+            todo_list.save_to_file(&todo_file_path)?;
         }
         Commands::Remove { id } => {
             todo_list.remove_task(id);
-            todo_list.save_to_file(filename)?;
+            todo_list.save_to_file(&todo_file_path)?;
         }
     }
 
