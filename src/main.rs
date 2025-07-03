@@ -16,20 +16,18 @@ struct Cli {
 #[derive(Subcommand, Debug)]
 enum Commands {
     Add {
-        #[arg(short, long)]
         title: String,
         #[arg(short, long, default_value_t = false)]
         quiet: bool,
     },
     List,
     Complete {
-        #[arg(short, long)]
         id: usize,
     },
     Remove {
-        #[arg(short, long)]
         id: usize,
     },
+    Info,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -70,7 +68,7 @@ impl TodoList {
         } else {
             for task in &self.tasks {
                 println!(
-                    "{}: [{}] {}",
+                    "{}\t[{}]\t{}",
                     task.id,
                     if task.completed { "X" } else { " " },
                     task.title
@@ -142,6 +140,9 @@ fn main() -> io::Result<()> {
         Commands::Remove { id } => {
             todo_list.remove_task(id);
             todo_list.save_to_file(&todo_file_path)?;
+        }
+        Commands::Info => {
+            println!("data file: {}", todo_file_path.display());
         }
     }
 
