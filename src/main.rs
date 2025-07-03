@@ -18,6 +18,8 @@ enum Commands {
     Add {
         #[arg(short, long)]
         title: String,
+        #[arg(short, long, default_value_t = false)]
+        quiet: bool,
     },
     List,
     Complete {
@@ -51,13 +53,15 @@ impl TodoList {
         }
     }
 
-    fn add_task(&mut self, title: String) {
+    fn add_task(&mut self, title: String) -> usize {
+        let id = self.next_id;
         self.tasks.push(Task {
-            id: self.next_id,
+            id,
             title,
             completed: false,
         });
         self.next_id += 1;
+        id
     }
 
     fn list_tasks(&self) {
@@ -118,12 +122,14 @@ fn get_todo_file_path() -> io::Result<PathBuf> {
 fn main() -> io::Result<()> {
     let cli = Cli::parse();
     let todo_file_path = get_todo_file_path()?;
-    println!("todo file path: {:?}", todo_file_path);
     let mut todo_list = TodoList::load_from_file(&todo_file_path)?;
 
     match cli.command {
-        Commands::Add { title } => {
-            todo_list.add_task(title);
+        Commands::Add { title, quiet } => {
+            let task_id = todo_list.add_task(title);
+            if !quiet {
+                println!("{}", task_id);
+            }
             todo_list.save_to_file(&todo_file_path)?;
         }
         Commands::List => {
