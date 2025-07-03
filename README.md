@@ -4,7 +4,7 @@ A dead simple task list manager for the command line.
 
 ## Usage
 
-Create a task:
+### Create a task
 
 ``` sh
 $ todo add "Buy milk"
@@ -16,7 +16,7 @@ This will output the ID of the added task:
 17
 ```
 
-List tasks:
+### List tasks
 
 ``` sh
 $ todo list
@@ -30,25 +30,25 @@ and description:
 17  [ ] Buy milk
 ```
 
-Mark a task as done by ID:
+### Mark a task as done by ID
 
 ``` sh
 $ todo complete 1
 ```
 
-Delete a task by ID:
+### Delete a task by ID
 
 ``` sh
 $ todo remove 1
 ```
 
-View help:
+### View help
 
 ``` sh
 $ todo -h
 ```
 
-View information:
+### View information
 
 ``` sh
 $ todo info
