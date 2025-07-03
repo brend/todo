@@ -7,7 +7,13 @@ A dead simple task list manager for the command line.
 Create a task:
 
 ``` sh
-$ todo add -t "Buy milk"
+$ todo add "Buy milk"
+```
+
+This will output the ID of the added task:
+
+```
+17
 ```
 
 List tasks:
@@ -16,16 +22,24 @@ List tasks:
 $ todo list
 ```
 
+This will print a list of tasks width their IDs, status,
+and description:
+
+```
+12  [ ] Read README.md
+17  [ ] Buy milk
+```
+
 Mark a task as done by ID:
 
 ``` sh
-$ todo complete -i 1
+$ todo complete 1
 ```
 
 Delete a task by ID:
 
 ``` sh
-$ todo remove -i 1
+$ todo remove 1
 ```
 
 View help:
@@ -33,3 +47,12 @@ View help:
 ``` sh
 $ todo -h
 ```
+
+View information:
+
+``` sh
+$ todo info
+```
+
+Right now, this will print the location
+of the data file.
