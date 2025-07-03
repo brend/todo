@@ -7,29 +7,29 @@ A dead simple task list manager for the command line.
 Create a task:
 
 ``` sh
-todo add -t "Buy milk"
+$ todo add -t "Buy milk"
 ```
 
 List tasks:
 
 ``` sh
-todo list
+$ todo list
 ```
 
 Mark a task as done by ID:
 
 ``` sh
-todo complete -i 1
+$ todo complete -i 1
 ```
 
 Delete a task by ID:
 
 ``` sh
-todo remove -i 1
+$ todo remove -i 1
 ```
 
 View help:
 
 ``` sh
-todo -h
+$ todo -h
 ```
